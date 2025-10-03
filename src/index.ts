@@ -1,3 +1,5 @@
+import { hasValue, typeOf } from '@aalencarv/common-utils';
+
 export const SqlAnsiOperator = {
   equal: '=' as '=',
   notEqual: '<>' as '<>',
@@ -65,28 +67,42 @@ export type SqlAnsiLogicOperator = typeof SqlAnsiLogicOperator[keyof typeof SqlA
 export interface Condition {
     leftOperand: any
     operator: SqlAnsiOperator,
-    rightOperand: any 
+    rightOperand?: any,
+    expression?: string
 }
 
 export class Condition implements Condition {
-     constructor(init?: Partial<Condition>) {
-        Object.assign(this, init);
-    }
+     constructor(init?: Partial<Condition> | [any, SqlAnsiOperator, any?] | string) {
+        if (hasValue(init)) {
+            if (typeOf(init) === 'array') {
+                this.leftOperand = (init as any)[0];
+                this.operator = (init as any)[1] || undefined;
+                this.rightOperand = (init as any)[2] || undefined;
+            } else if (typeof init === 'string') {
+                this.expression = init;
+            } else {
+                Object.assign(this, init);
+            }
+        }
+    }  
 }
 
 export type Conditions = string | string[] | Condition | Condition[] | {
-    [k in SqlAnsiLogicOperator] : string | string[] | Condition | Condition[] | Conditions | Conditions[]
+    [SqlAnsiPredicateFunction.exists]? : string | SelectQuery | UnionQuery | WithQuery,
+    [SqlAnsiPredicateFunction.notExists]? : string | SelectQuery | UnionQuery | WithQuery,
+    [SqlAnsiLogicOperator.and]? : string | string[] | Condition | Condition[] | Conditions | Conditions[],
+    [SqlAnsiLogicOperator.or]? : string | string[] | Condition | Condition[] | Conditions | Conditions[]
 }
 
 export interface Column {
-    column: string | SqlAnsiFunction | SelectQuery | UnionQuery, 
+    column: string | SqlAnsiFunction | SelectQuery | UnionQuery | WithQuery, 
     alias?: string
 }
 
 export type JoinType = 'inner' | 'left' | 'right' | 'cross';
 
 export interface FromTable {
-    table: string | SelectQuery | UnionQuery; 
+    table: string | SelectQuery | UnionQuery | WithQuery; 
     alias?: string 
 }
 
@@ -114,8 +130,8 @@ export class UnionQuery implements UnionQuery {
 }
 
 export interface WithQuery {
-    queries: {query: SelectQuery | UnionQuery, alias: string}[]
-    mainQuery: SelectQuery | UnionQuery
+    queries: {query: SelectQuery | UnionQuery | WithQuery, alias: string}[]
+    mainQuery: SelectQuery | UnionQuery | WithQuery
 }
 export class WithQuery implements WithQuery {
     constructor(init?: Partial<WithQuery>) {
@@ -124,12 +140,12 @@ export class WithQuery implements WithQuery {
 }
 
 export interface SelectQuery {
-    columns: [string | Column,...(string | Column)[]];
-    from: [(string | FromTable), ...(string | FromItem)[]];
-    where?: Conditions;
-    groupBy?: (string | Column)[];
-    having?: Conditions;
-    orderBy?: (string | number | OrderByColumn)[];
+    columns: string | Column | [string | Column,...(string | Column)[]];
+    from: string | FromTable | [(string | FromTable), ...(string | FromItem)[]];
+    where?: Condition | Conditions;
+    groupBy?: string | Column | (string | Column)[];
+    having?: Condition | Conditions;
+    orderBy?: string | number | OrderByColumn | (string | number | OrderByColumn)[];
     limit?: number | [number,number];
 }
 export class SelectQuery implements SelectQuery {

@@ -57,21 +57,25 @@ export type SqlAnsiLogicOperator = typeof SqlAnsiLogicOperator[keyof typeof SqlA
 export interface Condition {
     leftOperand: any;
     operator: SqlAnsiOperator;
-    rightOperand: any;
+    rightOperand?: any;
+    expression?: string;
 }
 export declare class Condition implements Condition {
-    constructor(init?: Partial<Condition>);
+    constructor(init?: Partial<Condition> | [any, SqlAnsiOperator, any?] | string);
 }
 export type Conditions = string | string[] | Condition | Condition[] | {
-    [k in SqlAnsiLogicOperator]: string | string[] | Condition | Condition[] | Conditions | Conditions[];
+    [SqlAnsiPredicateFunction.exists]?: string | SelectQuery | UnionQuery | WithQuery;
+    [SqlAnsiPredicateFunction.notExists]?: string | SelectQuery | UnionQuery | WithQuery;
+    [SqlAnsiLogicOperator.and]?: string | string[] | Condition | Condition[] | Conditions | Conditions[];
+    [SqlAnsiLogicOperator.or]?: string | string[] | Condition | Condition[] | Conditions | Conditions[];
 };
 export interface Column {
-    column: string | SqlAnsiFunction | SelectQuery | UnionQuery;
+    column: string | SqlAnsiFunction | SelectQuery | UnionQuery | WithQuery;
     alias?: string;
 }
 export type JoinType = 'inner' | 'left' | 'right' | 'cross';
 export interface FromTable {
-    table: string | SelectQuery | UnionQuery;
+    table: string | SelectQuery | UnionQuery | WithQuery;
     alias?: string;
 }
 export interface FromJoinTable extends FromTable {
@@ -92,21 +96,21 @@ export declare class UnionQuery implements UnionQuery {
 }
 export interface WithQuery {
     queries: {
-        query: SelectQuery | UnionQuery;
+        query: SelectQuery | UnionQuery | WithQuery;
         alias: string;
     }[];
-    mainQuery: SelectQuery | UnionQuery;
+    mainQuery: SelectQuery | UnionQuery | WithQuery;
 }
 export declare class WithQuery implements WithQuery {
     constructor(init?: Partial<WithQuery>);
 }
 export interface SelectQuery {
-    columns: [string | Column, ...(string | Column)[]];
-    from: [(string | FromTable), ...(string | FromItem)[]];
-    where?: Conditions;
-    groupBy?: (string | Column)[];
-    having?: Conditions;
-    orderBy?: (string | number | OrderByColumn)[];
+    columns: string | Column | [string | Column, ...(string | Column)[]];
+    from: string | FromTable | [(string | FromTable), ...(string | FromItem)[]];
+    where?: Condition | Conditions;
+    groupBy?: string | Column | (string | Column)[];
+    having?: Condition | Conditions;
+    orderBy?: string | number | OrderByColumn | (string | number | OrderByColumn)[];
     limit?: number | [number, number];
 }
 export declare class SelectQuery implements SelectQuery {

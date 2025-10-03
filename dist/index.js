@@ -1,3 +1,4 @@
+import { hasValue, typeOf } from '@aalencarv/common-utils';
 export const SqlAnsiOperator = {
     equal: '=',
     notEqual: '<>',
@@ -48,7 +49,19 @@ export const SqlAnsiLogicOperator = {
 };
 export class Condition {
     constructor(init) {
-        Object.assign(this, init);
+        if (hasValue(init)) {
+            if (typeOf(init) === 'array') {
+                this.leftOperand = init[0];
+                this.operator = init[1] || undefined;
+                this.rightOperand = init[2] || undefined;
+            }
+            else if (typeof init === 'string') {
+                this.expression = init;
+            }
+            else {
+                Object.assign(this, init);
+            }
+        }
     }
 }
 export class UnionQuery {
