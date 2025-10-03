@@ -46,3 +46,23 @@ export const SqlAnsiLogicOperator = {
     and: 'and',
     or: 'or'
 };
+export class Condition {
+    constructor(init) {
+        Object.assign(this, init);
+    }
+}
+export class UnionQuery {
+    constructor(init) {
+        Object.assign(this, init);
+    }
+}
+export class WithQuery {
+    constructor(init) {
+        Object.assign(this, init);
+    }
+}
+export class SelectQuery {
+    constructor(init) {
+        Object.assign(this, init);
+    }
+}

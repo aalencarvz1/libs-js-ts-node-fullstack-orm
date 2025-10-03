@@ -68,10 +68,15 @@ export interface Condition {
     rightOperand: any 
 }
 
+export class Condition implements Condition {
+     constructor(init?: Partial<Condition>) {
+        Object.assign(this, init);
+    }
+}
+
 export type Conditions = string | string[] | Condition | Condition[] | {
     [k in SqlAnsiLogicOperator] : string | string[] | Condition | Condition[] | Conditions | Conditions[]
 }
-
 
 export interface Column {
     column: string | SqlAnsiFunction | SelectQuery | UnionQuery, 
@@ -102,10 +107,20 @@ export interface UnionQuery {
     all: boolean;
     queries: (SelectQuery | WithQuery)[]
 }
+export class UnionQuery implements UnionQuery {
+    constructor(init?: Partial<UnionQuery>) {
+        Object.assign(this, init);
+    }
+}
 
 export interface WithQuery {
     queries: {query: SelectQuery | UnionQuery, alias: string}[]
     mainQuery: SelectQuery | UnionQuery
+}
+export class WithQuery implements WithQuery {
+    constructor(init?: Partial<WithQuery>) {
+        Object.assign(this, init);
+    }
 }
 
 export interface SelectQuery {
@@ -116,4 +131,9 @@ export interface SelectQuery {
     having?: Conditions;
     orderBy?: (string | number | OrderByColumn)[];
     limit?: number | [number,number];
+}
+export class SelectQuery implements SelectQuery {
+    constructor(init?: Partial<SelectQuery>) {
+        Object.assign(this, init);
+    }
 }
