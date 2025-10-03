@@ -1,0 +1,28 @@
+{
+  "name": "@aalencarv/fullstack-orm",
+  "package": "@aalencarvz1/libs-js-ts-node-fullstack-orm",
+  "version": "1.0.0",
+  "author": "aalencarvz@gmail.com",
+  "description": "a orm that can be parseable between front and back end",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "cross-env NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" npx jest --verbose",
+    "build": "tsc"
+  },
+  "keywords": [
+    "orm",
+    "fullstack",
+    "javascript",
+    "js",
+    "node"
+  ],
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "typescript": "^5.9.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
