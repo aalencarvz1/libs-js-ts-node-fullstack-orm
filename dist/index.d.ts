@@ -63,16 +63,21 @@ export interface Condition {
 export declare class Condition implements Condition {
     constructor(init?: Partial<Condition> | [any, SqlAnsiOperator, any?] | string);
 }
-export type Conditions = string | string[] | Condition | Condition[] | {
+export interface Conditions {
     [SqlAnsiPredicateFunction.exists]?: string | SelectQuery | UnionQuery | WithQuery;
     [SqlAnsiPredicateFunction.notExists]?: string | SelectQuery | UnionQuery | WithQuery;
-    [SqlAnsiLogicOperator.and]?: string | string[] | Condition | Condition[] | Conditions | Conditions[];
-    [SqlAnsiLogicOperator.or]?: string | string[] | Condition | Condition[] | Conditions | Conditions[];
-};
+    [SqlAnsiLogicOperator.and]?: CondictionsMultiType;
+    [SqlAnsiLogicOperator.or]?: CondictionsMultiType;
+}
+export declare class Conditions implements Conditions {
+    constructor(init?: Partial<Conditions>);
+}
+export type CondictionsMultiType = string | string[] | Condition | Condition[] | Conditions | Conditions[] | [any, SqlAnsiOperator, any] | [any, SqlAnsiOperator, any][];
 export interface Column {
     column: string | SqlAnsiFunction | SelectQuery | UnionQuery | WithQuery;
     alias?: string;
 }
+export type ColumnsMultiType = string | number | Column | [string | number | Column, ...(string | number | Column)[]];
 export type JoinType = 'inner' | 'left' | 'right' | 'cross';
 export interface FromTable {
     table: string | SelectQuery | UnionQuery | WithQuery;
@@ -80,9 +85,10 @@ export interface FromTable {
 }
 export interface FromJoinTable extends FromTable {
     join: JoinType;
-    on: Conditions;
+    on: CondictionsMultiType;
 }
 export type FromItem = FromTable | FromJoinTable;
+export type FromMultiType = string | FromTable | [(string | FromTable), ...(string | FromItem)[]];
 export type OrderByDirection = 'asc' | 'desc';
 export interface OrderByColumn extends Column {
     direction: OrderByDirection;
@@ -104,14 +110,16 @@ export interface WithQuery {
 export declare class WithQuery implements WithQuery {
     constructor(init?: Partial<WithQuery>);
 }
+export type OrderByMultiType = string | number | OrderByColumn | (string | number | OrderByColumn)[];
+export type LimitMultiType = number | [number, number];
 export interface SelectQuery {
-    columns: string | Column | [string | Column, ...(string | Column)[]];
-    from: string | FromTable | [(string | FromTable), ...(string | FromItem)[]];
-    where?: Condition | Conditions;
-    groupBy?: string | Column | (string | Column)[];
-    having?: Condition | Conditions;
-    orderBy?: string | number | OrderByColumn | (string | number | OrderByColumn)[];
-    limit?: number | [number, number];
+    columns?: ColumnsMultiType;
+    from?: FromMultiType;
+    where?: CondictionsMultiType;
+    groupBy?: ColumnsMultiType;
+    having?: CondictionsMultiType;
+    orderBy?: OrderByMultiType;
+    limit?: LimitMultiType;
 }
 export declare class SelectQuery implements SelectQuery {
     constructor(init?: Partial<SelectQuery>);

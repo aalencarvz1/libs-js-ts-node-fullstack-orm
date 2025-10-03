@@ -64,6 +64,11 @@ export class Condition {
         }
     }
 }
+export class Conditions {
+    constructor(init) {
+        Object.assign(this, init);
+    }
+}
 export class UnionQuery {
     constructor(init) {
         Object.assign(this, init);
