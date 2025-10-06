@@ -97,14 +97,15 @@ export class Conditions implements Conditions{
         Object.assign(this, init);
      }
 }
-export type CondictionsMultiType = string | string[] | Condition | Condition[] | Conditions | Conditions[] | [any, SqlAnsiOperator, any] | [any, SqlAnsiOperator, any][];
+export type CondictionsMultiType = (string | Condition | Conditions | [any, SqlAnsiOperator, any])[];
 
 
 export interface Column {
     column: string | SqlAnsiFunction | SelectQuery | UnionQuery | WithQuery;
     alias?: string;
 }
-export type ColumnsMultiType = string | number | Column | [string | number | Column,...(string | number | Column)[]];
+
+export type ColumnsMultiType = (string | number | Column)[];
 
 export type JoinType = 'inner' | 'left' | 'right' | 'cross';
 
@@ -119,7 +120,7 @@ export interface FromJoinTable extends FromTable {
 }
 
 export type FromItem = FromTable | FromJoinTable;
-export type FromMultiType = string | FromTable | [(string | FromTable), ...(string | FromItem)[]];
+export type FromMultiType = [(string | FromTable)?, ...(string | FromItem)[]];
 
 export type OrderByDirection = 'asc' | 'desc';
 
@@ -129,7 +130,7 @@ export interface OrderByColumn extends Column {
 
 export interface UnionQuery {
     all: boolean;
-    queries: (SelectQuery | WithQuery)[];
+    queries: (SelectQuery | UnionQuery | WithQuery)[];
 }
 export class UnionQuery implements UnionQuery {
     constructor(init?: Partial<UnionQuery>) {
@@ -147,8 +148,8 @@ export class WithQuery implements WithQuery {
     }
 }
 
-export type OrderByMultiType = string | number | OrderByColumn | (string | number | OrderByColumn)[];
-export type LimitMultiType = number | [number,number];
+export type OrderByMultiType = (string | number | Column | OrderByColumn)[];
+export type LimitMultiType = [number,number];
 
 
 export interface SelectQuery {
@@ -165,3 +166,4 @@ export class SelectQuery implements SelectQuery {
         Object.assign(this, init);
     }
 }
+
