@@ -1,4 +1,4 @@
-import { getOrCreateProp, hasValue, setOrCreateProp } from "@aalencarv/common-utils";
+import { firstValid, getOrCreateProp, hasValue, isArray, setOrCreateProp, typeOf } from "@aalencarv/common-utils";
 
 
 
@@ -42,28 +42,69 @@ export type SqlAnsiLogicOperator = typeof SqlAnsiLogicOperator[keyof typeof SqlA
 
 
 
+/*****************************************
+* Condition
+*****************************************/
+export interface BaseSqlComponent {
+    expression?: string;
+}
+export class BaseSqlComponent implements BaseSqlComponent{
+    constructor(init?: any) { //any to support all constructors parameters types
+        if (hasValue(init)) {
+            if (typeof init === 'string') {
+                this.expression = init;
+            } else {
+                Object.assign(this, init);
+            }
+        }
+    }
+}
+
 
 
 /*****************************************
 * Condition
 *****************************************/
-export class Condition {
+export interface Column {
+    name?: SelectQuery | UnionQuery | WithQuery | string | number;
+    alias?: string;
+}
+export class Column extends BaseSqlComponent implements Column {
+    constructor(init?: Partial<Column> | [SelectQuery | UnionQuery | WithQuery | string | number,string?] | SelectQuery | UnionQuery | WithQuery | string | number) {
+        super(init);
+        if (hasValue(init)) {
+            if(isArray(init)) {
+                this.name = init[0];
+                this.name = init[1];
+            } else if (typeOf(init) === 'object') {
+                if (Object.keys(init).indexOf('name') > -1) {
+                    this.name = (init as any)?.name;
+                    this.alias = (init as any)?.alias;
+                } else {
+                    this.name = init; //others objects
+                }
+            } else if (['number'].indexOf(typeOf(init)) > -1) { //string cannot be checked because it is treated as expression on base component
+                this.name = init;
+            }
+        }
+    }
+}
+
+
+/*****************************************
+* Condition
+*****************************************/
+export class Condition extends BaseSqlComponent {
     leftOperand?: any;
     operator?: SqlAnsiOperator;
-    rightOperand?: any;
-    expression?: string;
+    rightOperand?: any;    
 
     constructor(init?: Partial<Condition> | [any, SqlAnsiOperator, any] | string) {
-        if (hasValue(init)) {
-            if (typeof init === 'string') {
-                this.expression = init;
-            } else if (Array.isArray(init)) {
-                this.leftOperand = init[0];
-                this.operator = init[1];
-                this.rightOperand = init[2];
-            } else {
-                Object.assign(this, init);
-            }
+        super(init);
+        if (hasValue(init) && isArray(init)) {
+            this.leftOperand = init[0];
+            this.operator = init[1];
+            this.rightOperand = init[2];            
         }
     }
 }
@@ -74,45 +115,58 @@ export class Condition {
 /*****************************************
 * Condition
 *****************************************/
-export class LogicExpression {
+export class LogicExpression extends BaseSqlComponent {
   and?: (Condition | LogicExpression | [any, SqlAnsiOperator, any] | string)[];
   or?: (Condition | LogicExpression | [any, SqlAnsiOperator, any] | string)[];
+  not?: (Condition | LogicExpression | [any, SqlAnsiOperator, any] | string)[];
+  exists?: SelectQuery | UnionQuery | WithQuery | string;
+  notExists?: SelectQuery | UnionQuery | WithQuery | string;
 
-  constructor(init?: Partial<LogicExpression>) {
-    Object.assign(this, init);
+  constructor(init?: Partial<LogicExpression> | string) {
+    super(init);
   }
 }
 
 
 
-
-
 /*****************************************
-* UnionQuery
+* FromTable
 *****************************************/
-export interface UnionQuery {
-    all: boolean;
-    queries: (SelectQuery | UnionQuery | WithQuery)[];
+export interface FromTable extends BaseSqlComponent{
+    table?: SelectQuery | UnionQuery | WithQuery | string;
+    alias?: string;
 }
-export class UnionQuery implements UnionQuery {
-    constructor(init?: Partial<UnionQuery>) {
-        Object.assign(this, init);
+export class FromTable extends BaseSqlComponent implements FromTable{
+    constructor(init?: Partial<FromTable> | [SelectQuery | UnionQuery | WithQuery | string, string?] | SelectQuery | UnionQuery | WithQuery | string) {
+        super(init);
+        if (hasValue(init) && isArray(init)) {
+            this.table = init[0];
+            this.alias = init[1];
+        }
     }
 }
 
 
 
-
 /*****************************************
-* WithQuery
+* FromTable
 *****************************************/
-export interface WithQuery {
-    queries: {query: SelectQuery | UnionQuery | WithQuery, alias: string}[];
-    mainQuery: SelectQuery | UnionQuery | WithQuery;
+export interface JoinTable extends FromTable{
+    join?: 'inner' | 'left' | 'right' | 'cross' | undefined;
+    on?: (Condition | LogicExpression | [any, SqlAnsiOperator, any] | string )[];
 }
-export class WithQuery implements WithQuery {
-    constructor(init?: Partial<WithQuery>) {
-        Object.assign(this, init);
+export class JoinTable extends FromTable implements JoinTable{
+    constructor(init?: Partial<JoinTable> | [Partial<FromTable> | [SelectQuery | UnionQuery | WithQuery | string, string?] | SelectQuery | UnionQuery | WithQuery | string, 'inner' | 'left' | 'right' | 'cross', (Condition | LogicExpression | [any, SqlAnsiOperator, any] | string )[]] | Partial<FromTable> | [SelectQuery | UnionQuery | WithQuery | string, string?] | SelectQuery | UnionQuery | WithQuery | string) {
+        
+        if (hasValue(init)) {
+            if (isArray(init)) {
+                super(init[0]);
+                this.join = init[1] as any;
+                this.on = init[2];
+            } else {
+                super(init);                
+            } 
+        }
     }
 }
 
@@ -123,17 +177,56 @@ export class WithQuery implements WithQuery {
 /*****************************************
 * SelectQuery
 *****************************************/
-export interface SelectQuery {
-    columns?: any;
-    from?: any;
+export interface SelectQuery extends BaseSqlComponent{
+    columns?: (Column | [SelectQuery | UnionQuery | WithQuery | string | number,string?] | SelectQuery | UnionQuery | WithQuery | string | number)[];
+    from?: (FromTable | JoinTable)[];
     where?: (Condition | LogicExpression | [any, SqlAnsiOperator, any] | string )[];
-    groupBy?: any;
-    having?: any;
-    orderBy?: any;
-    limit?: any;
+    groupBy?: (Column | [SelectQuery | UnionQuery | WithQuery | string | number,string?] | SelectQuery | UnionQuery | WithQuery | string | number)[];
+    having?: (Condition | LogicExpression | [any, SqlAnsiOperator, any] | string )[];
+    orderBy?: (Column | [SelectQuery | UnionQuery | WithQuery | string | number,string?] | SelectQuery | UnionQuery | WithQuery | string | number)[];
+    limit?: [number,number?];
 }
-export class SelectQuery implements SelectQuery {
-    constructor(init?: Partial<SelectQuery>) {        
-        Object.assign(this, init);
+export class SelectQuery extends BaseSqlComponent implements SelectQuery {
+    constructor(init?: Partial<SelectQuery> | string) {        
+        super(init);
     }
 }
+
+
+
+/*****************************************
+* UnionQuery
+*****************************************/
+export interface UnionQuery extends BaseSqlComponent{
+    all?: boolean;
+    queries?: (SelectQuery | UnionQuery | WithQuery)[];
+}
+export class UnionQuery extends BaseSqlComponent implements UnionQuery {
+    constructor(init?: Partial<UnionQuery> | string) {
+        super(init);
+        init = init || {};
+        if (hasValue(init) && typeOf(init) === 'object') {
+            (init as Partial<UnionQuery>).all = firstValid([(init as Partial<UnionQuery>).all, true]);
+        }
+    }
+}
+
+
+
+
+/*****************************************
+* WithQuery
+*****************************************/
+export interface WithQuery extends BaseSqlComponent{
+    queries: {query: SelectQuery | UnionQuery | WithQuery | string, alias: string}[];
+    mainQuery: SelectQuery | UnionQuery | WithQuery | string;
+}
+export class WithQuery extends BaseSqlComponent implements WithQuery {
+    constructor(init?: Partial<WithQuery> | string) {
+        super(init);
+    }
+}
+
+
+
+
