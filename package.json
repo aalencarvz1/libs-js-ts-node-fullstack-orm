@@ -1,7 +1,7 @@
 {
   "name": "@aalencarv/fullstack-orm",
   "package": "@aalencarvz1/libs-js-ts-node-fullstack-orm",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "author": "aalencarvz@gmail.com",
   "description": "a orm that can be parseable between front and back end",
   "type": "module",
@@ -26,6 +26,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@aalencarv/common-utils": "^1.4.0"
+    "@aalencarv/common-utils": "^1.4.0",
+    "sequelize": "^6.37.7"
   }
 }
