@@ -1,3 +1,13 @@
+export {
+  isSequelizeOperation as isSequelizeOperation,
+  getSequelizeOperation as getSequelizeOperation,
+  prepareLogicalQueryParams as prepareSequelizeLogicalQueryParams,
+  prepareQueryParams as prepareSequelizeQueryParams,  
+} from "./sequelizeIntegration/SequelizeIntegration.js";
+import * as SequelizeIntegration from "./sequelizeIntegration/SequelizeIntegration.js";
+export { SequelizeIntegration };
+
+
 
 export interface UnionQuery {
     all: boolean;
