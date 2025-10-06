@@ -87,7 +87,7 @@ export function prepareLogicalQueryParams( queryParamsProp: any) : any {
     return result;
 }
 
-function prepareQueryParams(queryParams?: any) : any{
+export function prepareQueryParams(queryParams?: any) : any{
     queryParams = queryParams || {};      
     if (queryParams.where) {
         queryParams.where = prepareLogicalQueryParams(queryParams.where || {});
