@@ -1,4 +1,3 @@
-export * from "./sequelizeIntegration/SequelizeIntegration.js";
 
 export interface UnionQuery {
     all: boolean;
