@@ -1,6 +1,6 @@
 export {
-  isSequelizeOperation as isSequelizeOperation,
-  getSequelizeOperation as getSequelizeOperation,
+  isOperation as isSequelizeOperation,
+  getOperation as getSequelizeOperation,
   prepareLogicalQueryParams as prepareSequelizeLogicalQueryParams,
   prepareQueryParams as prepareSequelizeQueryParams,  
 } from "./sequelizeIntegration/SequelizeIntegration.js";

@@ -3,7 +3,7 @@ import { Op, Sequelize } from "sequelize";
 const opKeys = Object.keys(Op); 
 const opKeysLower = opKeys.map(el=>el.toLowerCase().trim());     
 
-export function isSequelizeOperation(name: any) : boolean {
+export function isOperation(name: any) : boolean {
     let result = false;
     if (name in Op) {
         result = true;
@@ -24,7 +24,7 @@ export function isSequelizeOperation(name: any) : boolean {
     return result;
 }
 
-export function getSequelizeOperation(name: any) : any {
+export function getOperation(name: any) : any {
     let result = name;
     if (typeof result === 'string') {
         result = result || '';
@@ -63,8 +63,8 @@ export function prepareLogicalQueryParams( queryParamsProp: any) : any {
         if (typeOf(queryParamsProp) === 'object') {
             //result = {}; //symbol keys not iteratable by for key in 
             for(const key in queryParamsProp) {    
-                if (isSequelizeOperation(key)) {
-                    let realOp = getSequelizeOperation(key);
+                if (isOperation(key)) {
+                    let realOp = getOperation(key);
                     result[realOp] = prepareLogicalQueryParams(queryParamsProp[key]);
                     delete result[key]; //replaced by simbol key
                 } else {
