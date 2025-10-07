@@ -1,7 +1,7 @@
 {
   "name": "@aalencarv/fullstack-orm",
   "package": "@aalencarvz1/libs-js-ts-node-fullstack-orm",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "author": "aalencarvz@gmail.com",
   "description": "a orm that can be parseable between front and back end",
   "type": "module",
